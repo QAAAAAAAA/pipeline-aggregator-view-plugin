@@ -42,7 +42,7 @@ public class PipelineAggregator extends View {
    private int refreshInterval;
 
    private boolean useCondensedTables;
-   
+
    private boolean onlyLastBuild;
 
    private boolean useScrollingCommits;
@@ -50,7 +50,7 @@ public class PipelineAggregator extends View {
    private String filterRegex;
 
    private boolean showCommitInfo;
-   private boolean showBuildNumber;
+   private boolean showDescription;
    private boolean showBuildTime;
    private boolean showBuildDuration;
 
@@ -62,11 +62,12 @@ public class PipelineAggregator extends View {
       this.buildHistorySize = 16;
       this.refreshInterval = 15;
       this.useCondensedTables = false;
-	  this.onlyLastBuild = false;
+      this.onlyLastBuild = false;
       this.filterRegex = null;
 
-      this.showCommitInfo = true;
-      this.showBuildNumber = true;
+      this.showCommitInfo = false;
+      // this.showBuildNumber = false;
+      this.showDescription = false;
       this.showBuildTime = true;
       this.showBuildDuration = true;
    }
@@ -98,53 +99,53 @@ public class PipelineAggregator extends View {
       return useCondensedTables;
    }
 
-    public boolean isShowCommitInfo() {
-        return showCommitInfo;
-    }
+   public boolean isShowCommitInfo() {
+      return showCommitInfo;
+   }
 
-    public void setShowCommitInfo(boolean showCommitInfo) {
-        this.showCommitInfo = showCommitInfo;
-    }
+   public void setShowCommitInfo(boolean showCommitInfo) {
+      this.showCommitInfo = showCommitInfo;
+   }
 
-    public boolean isShowBuildNumber() {
-        return showBuildNumber;
-    }
+   public boolean isShowDescription() {
+      return showDescription;
+   }
 
-    public void setShowBuildNumber(boolean showBuildNumber) {
-        this.showBuildNumber = showBuildNumber;
-    }
+   public void setShowDescription(boolean showDescription) {
+      this.showDescription = showDescription;
+   }
 
-    public boolean isShowBuildTime() {
-        return showBuildTime;
-    }
+   public boolean isShowBuildTime() {
+      return showBuildTime;
+   }
 
-    public void setShowBuildTime(boolean showBuildTime) {
-        this.showBuildTime = showBuildTime;
-    }
+   public void setShowBuildTime(boolean showBuildTime) {
+      this.showBuildTime = showBuildTime;
+   }
 
-    public boolean isShowBuildDuration() {
-        return showBuildDuration;
-    }
+   public boolean isShowBuildDuration() {
+      return showBuildDuration;
+   }
 
-    public void setShowBuildDuration(boolean showBuildDuration) {
-        this.showBuildDuration = showBuildDuration;
-    }
+   public void setShowBuildDuration(boolean showBuildDuration) {
+      this.showBuildDuration = showBuildDuration;
+   }
 
-	public boolean isUseScrollingCommits() {
-		return useScrollingCommits;
-	}
+   public boolean isUseScrollingCommits() {
+      return useScrollingCommits;
+   }
 
-	public void setUseScrollingCommits(boolean useScrollingCommits) {
-		this.useScrollingCommits = useScrollingCommits;
-	}
+   public void setUseScrollingCommits(boolean useScrollingCommits) {
+      this.useScrollingCommits = useScrollingCommits;
+   }
 
-	public boolean isOnlyLastBuild() {
-		return onlyLastBuild;
-	}
+   public boolean isOnlyLastBuild() {
+      return onlyLastBuild;
+   }
 
-	public void setOnlyLastBuild(boolean onlyLastBuild) {
-		this.onlyLastBuild = onlyLastBuild;
-	}
+   public void setOnlyLastBuild(boolean onlyLastBuild) {
+      this.onlyLastBuild = onlyLastBuild;
+   }
 
    public String getTableStyle() {
       return useCondensedTables ? "table-condensed" : "";
@@ -173,7 +174,8 @@ public class PipelineAggregator extends View {
       this.onlyLastBuild = json.getBoolean("onlyLastBuild");
 
       this.showCommitInfo = json.getBoolean("showCommitInfo");
-      this.showBuildNumber = json.getBoolean("showBuildNumber");
+      // this.showBuildNumber = json.getBoolean("showBuildNumber");
+      this.showDescription = json.getBoolean("showDescription");
       this.showBuildTime = json.getBoolean("showBuildTime");
       this.showBuildDuration = json.getBoolean("showBuildDuration");
 
@@ -213,8 +215,7 @@ public class PipelineAggregator extends View {
    public static final class DescriptorImpl extends ViewDescriptor {
       @Override
       public String getDisplayName() {
-         return
-            "Pipeline Aggregator View";
+         return "Pipeline Aggregator View";
       }
    }
 
@@ -229,33 +230,33 @@ public class PipelineAggregator extends View {
       Pattern r = filterRegex != null ? Pattern.compile(filterRegex) : null;
       List<WorkflowJob> fJobs = filterJobs(jobs, r);
       List<Build> l = new ArrayList();
-	  List<WorkflowRun> wfr = new ArrayList<WorkflowRun>();
-	  if( !this.onlyLastBuild ) {
-		  RunList<WorkflowRun> builds = new RunList(fJobs).limit(buildHistorySize);
-		  for ( WorkflowRun build : builds){
-			  wfr.add(build);
-		  }
-	  } else {
-		  for(WorkflowJob job : fJobs) {
-			  wfr.add(job.getLastBuild());
-		  }
-	  }
-	  if( wfr != null && wfr.size() > 0 ) {
-		  for (WorkflowRun build : wfr) {
-			  List<ChangeLogSet<? extends ChangeLogSet.Entry>> changeLogSets = ((WorkflowRun) build).getChangeSets();
-			  Result result = build.getResult();
-				l.add(new Build(build.getDisplayName(), build.getFullDisplayName(), build.getUrl(), build.getNumber(),
-						build.getStartTimeInMillis(), build.getDuration(), result == null ? "BUILDING" : result.toString(),
-						changeLogSets));
-		  }
-	  }
+      List<WorkflowRun> wfr = new ArrayList<WorkflowRun>();
+      if (!this.onlyLastBuild) {
+         RunList<WorkflowRun> builds = new RunList(fJobs).limit(buildHistorySize);
+         for (WorkflowRun build : builds) {
+            wfr.add(build);
+         }
+      } else {
+         for (WorkflowJob job : fJobs) {
+            wfr.add(job.getLastBuild());
+         }
+      }
+      if (wfr != null && wfr.size() > 0) {
+         for (WorkflowRun build : wfr) {
+            List<ChangeLogSet<? extends ChangeLogSet.Entry>> changeLogSets = ((WorkflowRun) build).getChangeSets();
+            Result result = build.getResult();
+            l.add(new Build(build.getDisplayName(), build.getFullDisplayName(), build.getUrl(), build.getNumber(),
+                  build.getDescription(), build.getStartTimeInMillis(), build.getDuration(),
+                  result == null ? "BUILDING" : result.toString(), changeLogSets));
+         }
+      }
       return l;
    }
 
    public List<WorkflowJob> filterJobs(List<WorkflowJob> jobs, Pattern r) {
-      if(r == null)
+      if (r == null)
          return jobs;
-      for (Iterator<WorkflowJob> iterator = jobs.iterator(); iterator.hasNext(); ) {
+      for (Iterator<WorkflowJob> iterator = jobs.iterator(); iterator.hasNext();) {
          WorkflowJob job = iterator.next();
          WorkflowRun run = job.getLastBuild();
          if (run != null) {
@@ -269,7 +270,6 @@ public class PipelineAggregator extends View {
       return jobs;
    }
 
-
    @ExportedBean(defaultVisibility = 999)
    public static class Build {
       @Exported
@@ -281,6 +281,8 @@ public class PipelineAggregator extends View {
       @Exported
       public int number;
       @Exported
+      public String description;
+      @Exported
       public long startTime;
       @Exported
       public long duration;
@@ -289,10 +291,13 @@ public class PipelineAggregator extends View {
       @Exported
       public List<ChangeLog> changeLogSet;
 
-      public Build(String jobName, String buildName, String url, int number, long startTime, long duration, String result, List<ChangeLogSet<? extends ChangeLogSet.Entry>> changeLogSets) {
+      public Build(String jobName, String buildName, String url, int number, String description, long startTime,
+            long duration,
+            String result, List<ChangeLogSet<? extends ChangeLogSet.Entry>> changeLogSets) {
          this.jobName = jobName;
          this.buildName = buildName;
          this.number = number;
+         this.description = description;
          this.startTime = startTime;
          this.duration = duration;
          this.result = result;
@@ -329,4 +334,3 @@ public class PipelineAggregator extends View {
       }
    }
 }
-

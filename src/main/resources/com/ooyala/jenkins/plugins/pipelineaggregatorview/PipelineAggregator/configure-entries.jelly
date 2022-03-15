@@ -31,8 +31,8 @@
         <f:entry title="${%Show commit info}">
             <f:checkbox name="showCommitInfo" field="showCommitInfo" />
         </f:entry>
-        <f:entry title="${%Show build number}">
-            <f:checkbox name="showBuildNumber" field="showBuildNumber" />
+        <f:entry title="${%Show description}">
+            <f:checkbox name="showDescription" field="showDescription" />
         </f:entry>
         <f:entry title="${%Show build time}">
             <f:checkbox name="showBuildTime" field="showBuildTime" />

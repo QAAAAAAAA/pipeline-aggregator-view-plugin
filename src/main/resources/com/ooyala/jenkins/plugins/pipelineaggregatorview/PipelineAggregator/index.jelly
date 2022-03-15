@@ -1,4 +1,4 @@
-<j: xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:x="jelly:xml">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:x="jelly:xml">
     <st:contentType value="text/html;charset=UTF-8" />
     <j:new var="h" className="hudson.Functions"/>
     ${h.initPageVariables(context)}
@@ -28,12 +28,12 @@
                 var useScrollingCommits= ${it.useScrollingCommits};
                 var onlyLastBuild= ${it.onlyLastBuild};
                 var showCommitInfo = ${it.showCommitInfo};
-                var showBuildNumber = ${it.showBuildNumber};
+                var showDescription = ${it.showDescription};
                 var showBuildTime = ${it.showBuildTime};
                 var showBuildDuration = ${it.showBuildDuration};
                 var rollingCommits = false;
                 function reload_info (interval) {
-                    reload_jenkins_build_history('#jenkinsBuildHistory', jenkinsUrl + '/${it.url}', buildHistorySize, useScrollingCommits, onlyLastBuild, showCommitInfo, showBuildNumber, showBuildTime, showBuildDuration);
+                    reload_jenkins_build_history('#jenkinsBuildHistory', jenkinsUrl + '/${it.url}', buildHistorySize, useScrollingCommits, onlyLastBuild, showCommitInfo, showDescription, showBuildTime, showBuildDuration);
                     setTimeout(function(){ reload_info(interval); }, interval);
                 }
             </script>
@@ -56,8 +56,8 @@
                                     if(showCommitInfo) {
                                         document.write("<th>${%Commits}</th>");
                                     }
-                                    if(showCommitInfo) {
-                                        document.write("<th>${%Build}</th>");
+                                    if(showDescription) {
+                                        document.write("<th>${%Descripiton}</th>");
                                     }
                                     if(showBuildTime) {
                                         document.write("<th>${%Finished}</th>");
@@ -85,4 +85,4 @@
             </script>
         </body>
     </html>
-</j:>
+</j:jelly>
