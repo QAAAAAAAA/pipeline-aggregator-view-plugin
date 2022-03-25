@@ -57,6 +57,8 @@ function reload_jenkins_build_history(tableSelector, viewUrl, buildHistorySize, 
          var url = val.url;
          bame = '<a href="' + url + '" class="job-title">' + escapeUntrustedHtml(buildName) + '</a>';
          stages = '<div class="btn-group" role="group">'
+
+         // stages
          $.getJSON(url + "wfapi/describe", function (data) {
             if (typeof data.stages !== 'undefined' && data.stages.length > 0) {
                var changeSet = val.changeLogSet;
@@ -96,7 +98,21 @@ function reload_jenkins_build_history(tableSelector, viewUrl, buildHistorySize, 
                         classes = '';
                   }
 
-                  stages += '<button type="button" class="btn ' + classes + '">' + escapeUntrustedHtml(data.stages[stage].name) + '</button>';
+                  // stage
+                  $.getJSON(url + 'execution/node/' + data.stages[stage].id + "/wfapi/describe", function (data) {
+                     dashboard = '&nbsp;';
+                     for (stageFlow in data.stageFlowNodes) {
+                        if ('parameterDescription' in data.stageFlowNodes[stageFlow]) {
+                           description = data.stageFlowNodes[stageFlow].parameterDescription;
+                           if (description.startsWith('dashboard:')) {
+                              dashboard = description.split(':').pop();
+                              break;
+                           }
+                        }
+                     }
+                  });
+
+                  stages += '<button type="button" class="btn ' + classes + '">' + '<span style="font-size:100%;">' + escapeUntrustedHtml(data.stages[stage].name) + '</span><br><span style="font-size:60%;">' + escapeUntrustedHtml(dashboard) + '</span></button>';
                }
             }
             stages += '</div>'
