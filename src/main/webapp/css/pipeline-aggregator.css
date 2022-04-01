@@ -1,8 +1,10 @@
-html, body {
+html,
+body {
   height: 100%;
 }
 
-th, td {
+th,
+td {
   text-align: center;
 }
 
@@ -43,11 +45,14 @@ a {
   background-color: #ff5044;
 }
 
-.btn-warning, .table>tbody>tr.warning>td {
+.btn-warning,
+.table>tbody>tr.warning>td {
   background-color: #d38312;
 }
 
-.container-fluid, .col-lg-4, .col-lg-12 {
+.container-fluid,
+.col-lg-4,
+.col-lg-12 {
   padding-right: 2px;
   padding-left: 2px;
 }
@@ -75,25 +80,53 @@ a {
 
 
 @-webkit-keyframes pulse {
-  0% {background-color: #45CEEF;}
-  25% {background-color: #3c8293;}
-  50% {background-color: #1d46ff;}
-  75% {background-color: #3859e4;}
-  100% {background-color: #2e29d8;}
-}
-@-moz-keyframes pulse {
-  0% {background-color: #45CEEF;}
-  25% {background-color: #3c8293;}
-  50% {background-color: #1d46ff;}
-  75% {background-color: #3859e4;}
-  100% {background-color: #2e29d8;}
+  0% {
+    background-color: #45CEEF;
+  }
+
+  25% {
+    background-color: #3c8293;
+  }
+
+  50% {
+    background-color: #1d46ff;
+  }
+
+  75% {
+    background-color: #3859e4;
+  }
+
+  100% {
+    background-color: #2e29d8;
+  }
 }
 
-marquee{
+@-moz-keyframes pulse {
+  0% {
+    background-color: #45CEEF;
+  }
+
+  25% {
+    background-color: #3c8293;
+  }
+
+  50% {
+    background-color: #1d46ff;
+  }
+
+  75% {
+    background-color: #3859e4;
+  }
+
+  100% {
+    background-color: #2e29d8;
+  }
+}
+
+marquee {
   overflow: hidden;
 }
 
 .marqueeClass {
   overflow: hidden;
 }
-

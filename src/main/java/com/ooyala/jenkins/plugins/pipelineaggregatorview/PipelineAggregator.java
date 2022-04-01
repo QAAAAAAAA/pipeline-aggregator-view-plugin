@@ -62,12 +62,11 @@ public class PipelineAggregator extends View {
       this.buildHistorySize = 16;
       this.refreshInterval = 15;
       this.useCondensedTables = false;
-      this.onlyLastBuild = false;
+      this.onlyLastBuild = true;
       this.filterRegex = null;
 
       this.showCommitInfo = false;
-      // this.showBuildNumber = false;
-      this.showDescription = false;
+      this.showDescription = true;
       this.showBuildTime = true;
       this.showBuildDuration = true;
    }

@@ -34,8 +34,8 @@ function escapeUntrustedHtml(str) {
    return $('<div>').text(str).html();
 }
 
-function reload_jenkins_build_history(tableSelector, viewUrl, buildHistorySize, useScrollingCommits, onlyLastBuild) {
-   $.getJSON(viewUrl + 'api/json', function (data) {
+function reload_jenkins_build_history(tableSelector, viewURL, buildHistorySize, useScrollingCommits, onlyLastBuild) {
+   $.getJSON(viewURL + 'api/json', function (data) {
       i = 0;
       var newRows = [];
       $.each(data.builds, function (key, val) {
@@ -53,29 +53,15 @@ function reload_jenkins_build_history(tableSelector, viewUrl, buildHistorySize, 
          } else {
             authors = '<div>'
          }
-         buildName = val.buildName.replace(/(.*) #.*/, '$1') + "#" + val.number;
-         var url = val.url;
-         bame = '<a href="' + url + '" class="job-title">' + escapeUntrustedHtml(buildName) + '</a>';
+         jobName = val.buildName.replace(/(.*) #.*/, '$1');
+         blueURL = '/blue/rest/organizations/jenkins/pipelines/' + jobName + '/runs/' + val.number + '/nodes/';
+         bame = '<a href="' + val.url + '" class="job-title">' + escapeUntrustedHtml(val.buildName) + '</a>';
          stages = '<div class="btn-group" role="group">'
 
-         // stages
-         $.getJSON(url + "wfapi/describe", function (data) {
-            if (typeof data.stages !== 'undefined' && data.stages.length > 0) {
-               var changeSet = val.changeLogSet;
-               if (typeof data._links.changesets !== 'undefined') {
-                  for (var i = 0; i < changeSet.length; i++) {
-                     text = '<strong>' + escapeUntrustedHtml(changeSet[i].author) + '</strong> ' + escapeUntrustedHtml(changeSet[i].message) + '</br>'
-                     authors += text;
-                  }
-               } else {
-                  authors += 'No Changes'
-               }
-               if (useScrollingCommits) {
-                  authors += '</marquee>' + '</div>';
-               } else
-                  authors += '</div>'
-               for (stage in data.stages) {
-                  switch (data.stages[stage].status) {
+         $.getJSON(blueURL, function (data) {
+            if (data.length > 0) {
+               for (stage in data) {
+                  switch (data[stage].result) {
                      case 'SUCCESS':
                         classes = 'btn-success';
                         tableClass = 'sucess'
@@ -98,22 +84,35 @@ function reload_jenkins_build_history(tableSelector, viewUrl, buildHistorySize, 
                         classes = '';
                   }
 
-                  // stage
-                  $.getJSON(url + 'execution/node/' + data.stages[stage].id + "/wfapi/describe", function (data) {
-                     dashboard = '&nbsp;';
-                     for (stageFlow in data.stageFlowNodes) {
-                        if ('parameterDescription' in data.stageFlowNodes[stageFlow]) {
-                           description = data.stageFlowNodes[stageFlow].parameterDescription;
-                           if (description.startsWith('dashboard:')) {
-                              dashboard = description.split(':').pop();
-                              break;
-                           }
+                  if (stage > 0 && data[stage].type != "PARALLEL") {
+                     stages += '</div>'
+                  }
+
+                  if (data[stage].type == "PARALLEL") {
+                     displayName = data[stage].displayName
+                  } else {
+                     displayName = "Stage: " + data[stage].displayName
+                  }
+
+                  steps_url = '/blue/rest/organizations/jenkins/pipelines/' + jobName + '/runs/' + val.number + '/nodes/' + data[stage].id + '/steps/'
+                  $.getJSON(steps_url, function (data) {
+                     dashboard = '';
+                     for (step in data) {
+                        displayDescription = String(data[step].displayDescription);
+                        if (displayDescription.startsWith('dashboard:')) {
+                           dashboard = displayDescription.split(':').pop();
+                           break;
                         }
                      }
                   });
 
-                  stages += '<button type="button" class="btn ' + classes + '">' + '<span style="font-size:100%;">' + escapeUntrustedHtml(data.stages[stage].name) + '</span><br><span style="font-size:60%;">' + escapeUntrustedHtml(dashboard) + '</span></button>';
+                  if (data[stage].type == "PARALLEL") {
+                     stages += '<button type="button" class="btn ' + classes + '">' + '<span style="font-size:100%;">' + escapeUntrustedHtml(displayName) + '</span><br><span style="font-size:60%;">' + escapeUntrustedHtml(dashboard) + '</span></button>';
+                  } else {
+                     stages += '<div class="btn-group' + stage + '" role="group"><button type="button" class="btn ' + classes + '">' + '<span style="font-size:100%;">' + escapeUntrustedHtml(displayName) + '</span><br><span style="font-size:60%;">' + escapeUntrustedHtml(dashboard) + '</span></button>';
+                  }
                }
+               stages += '</div>'
             }
             stages += '</div>'
 
@@ -136,6 +135,87 @@ function reload_jenkins_build_history(tableSelector, viewUrl, buildHistorySize, 
             newRows.push($(newRow));
 
          });
+
+
+
+         // stages
+         // $.getJSON(url + "wfapi/describe", function (data) {
+         //    if (typeof data.stages !== 'undefined' && data.stages.length > 0) {
+         //       var changeSet = val.changeLogSet;
+         //       if (typeof data._links.changesets !== 'undefined') {
+         //          for (var i = 0; i < changeSet.length; i++) {
+         //             text = '<strong>' + escapeUntrustedHtml(changeSet[i].author) + '</strong> ' + escapeUntrustedHtml(changeSet[i].message) + '</br>'
+         //             authors += text;
+         //          }
+         //       } else {
+         //          authors += 'No Changes'
+         //       }
+         //       if (useScrollingCommits) {
+         //          authors += '</marquee>' + '</div>';
+         //       } else
+         //          authors += '</div>'
+         //       for (stage in data.stages) {
+         //          switch (data.stages[stage].status) {
+         //             case 'SUCCESS':
+         //                classes = 'btn-success';
+         //                tableClass = 'sucess'
+         //                break;
+         //             case 'FAILED':
+         //                classes = 'btn-danger'
+         //                break;
+         //             case 'ABORTED':
+         //                classes = 'btn-warning';
+         //                tableClass = 'warning'
+         //             case 'UNSTABLE':
+         //                classes = 'btn-warning';
+         //                tableClass = 'danger'
+         //                break;
+         //             case 'IN_PROGRESS':
+         //                classes = 'info invert-text-color';
+         //                tableClass = 'info'
+         //                break;
+         //             default:
+         //                classes = '';
+         //          }
+
+         //          // stage
+         //          $.getJSON(url + 'execution/node/' + data.stages[stage].id + "/wfapi/describe", function (data) {
+         //             dashboard = '&nbsp;';
+         //             for (stageFlow in data.stageFlowNodes) {
+         //                if ('parameterDescription' in data.stageFlowNodes[stageFlow]) {
+         //                   description = data.stageFlowNodes[stageFlow].parameterDescription;
+         //                   if (description.startsWith('dashboard:')) {
+         //                      dashboard = description.split(':').pop();
+         //                      break;
+         //                   }
+         //                }
+         //             }
+         //          });
+
+         //          stages += '<button type="button" class="btn ' + classes + '">' + '<span style="font-size:100%;">' + escapeUntrustedHtml(data.stages[stage].name) + '</span><br><span style="font-size:60%;">' + escapeUntrustedHtml(dashboard) + '</span></button>';
+         //       }
+         //    }
+         //    stages += '</div>'
+
+
+         //    newRow = '<tr><td class="job-wrap text-left">' + bame + '</td><td class="text-left">' + stages + '</td>';
+         //    if (showCommitInfo) {
+         //       newRow += '<td>' + authors + '</td>';
+         //    }
+         //    if (showDescription) {
+         //       newRow += '<td>' + val.description + '</td>';
+         //    }
+         //    if (showBuildTime) {
+         //       newRow += '<td>' + format_date(dt) + '</td>';
+         //    }
+         //    if (showBuildDuration) {
+         //       newRow += '<td>' + format_interval(val.duration) + '</td>';
+         //    }
+         //    newRow += '</tr>';
+         //    $(tableSelector + ' tbody').append(newRow);
+         //    newRows.push($(newRow));
+
+         // });
       });
       // Remove all existing rows
       $(tableSelector + ' tbody').find('tr').remove();
